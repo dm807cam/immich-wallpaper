@@ -31,6 +31,7 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
 linux:
   category: Utility
+  artifactName: "${productName}-${version}.${ext}"
   target:
     - AppImage
     - deb
