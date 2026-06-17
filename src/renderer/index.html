@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+    />
+    <title>Immich Wallpaper</title>
+    <link rel="stylesheet" href="./ui/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <strong>Immich Wallpaper</strong>
+      <span id="statusDot" class="dot" title="Disconnected"></span>
+    </header>
+    <nav class="tabs">
+      <button data-tab="connection" class="active">Connection</button>
+      <button data-tab="wallpaper">Wallpaper</button>
+      <button data-tab="presets">Presets</button>
+    </nav>
+    <div id="errBar" hidden></div>
+    <main id="app"></main>
+    <footer class="footer">
+      <button id="applyNow">Next wallpaper now</button>
+      <button id="pauseToggle" class="secondary">Pause</button>
+    </footer>
+    <script type="module" src="./ui/main.ts"></script>
+  </body>
+</html>

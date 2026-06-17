@@ -1,0 +1,36 @@
+appId: com.immichbg.app
+productName: Immich Wallpaper
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**
+  - resources/**
+  - package.json
+# sharp + wallpaper ship native binaries / platform helpers that must NOT be packed
+# inside the asar archive, or they fail to load / exec at runtime.
+asarUnpack:
+  - node_modules/sharp/**
+  - node_modules/@img/**
+  - node_modules/wallpaper/**
+mac:
+  category: public.app-category.utilities
+  target:
+    - dmg
+  # Menu-bar-only agent: no Dock icon, does not appear in the app switcher.
+  extendInfo:
+    LSUIElement: true
+    # macOS 14+ gates connections to local-network (LAN) addresses behind a
+    # privacy prompt. Without this key the prompt never fires and requests to a
+    # self-hosted Immich at 192.168.x/10.x silently fail with "fetch failed".
+    NSLocalNetworkUsageDescription: >-
+      Immich Wallpaper connects to your Immich server on your local network to
+      download photos for your wallpaper.
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+linux:
+  category: Utility
+  target:
+    - AppImage
+    - deb
