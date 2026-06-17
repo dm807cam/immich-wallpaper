@@ -53,7 +53,7 @@ jobs:
 
       - name: Package macOS (${{ matrix.arch }})
         if: matrix.platform == 'mac'
-        run: npx electron-builder --mac --${{ matrix.arch }}
+        run: npx electron-builder --mac --${{ matrix.arch }} --publish never
         env:
           # Disable code-signing in CI. To enable, add CSC_LINK / CSC_KEY_PASSWORD
           # secrets to the repo and remove this line.
@@ -61,7 +61,7 @@ jobs:
 
       - name: Package Linux
         if: matrix.platform == 'linux'
-        run: npx electron-builder --linux --x64
+        run: npx electron-builder --linux --x64 --publish never
 
       - name: Upload macOS DMG to release
         if: matrix.platform == 'mac'
