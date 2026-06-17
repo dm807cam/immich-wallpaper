@@ -57,8 +57,9 @@ jobs:
         if: matrix.platform == 'mac'
         run: npx electron-builder --mac --${{ matrix.arch }} --publish never
         env:
-          # Disable code-signing in CI. To enable, add CSC_LINK / CSC_KEY_PASSWORD
-          # secrets to the repo and remove this line.
+          # Full notarization requires an Apple Developer account; add CSC_LINK /
+          # CSC_KEY_PASSWORD / APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID
+          # secrets to enable it.
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Package Linux

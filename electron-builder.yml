@@ -26,6 +26,10 @@ mac:
     NSLocalNetworkUsageDescription: >-
       Immich Wallpaper connects to your Immich server on your local network to
       download photos for your wallpaper.
+  # Releases are unsigned. Gatekeeper blocks the app on first launch;
+  # run: xattr -cr "/Applications/Immich Wallpaper.app"
+  # To enable signing + notarization add CSC_LINK / CSC_KEY_PASSWORD /
+  # APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID repo secrets.
   hardenedRuntime: true
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist

@@ -13,9 +13,22 @@ from a self-hosted [Immich](https://immich.app) server.
 ## Requirements
 
 **macOS 13+**
-On first connection macOS will prompt for **Local Network** access. You must
-**Allow** it; otherwise requests to a LAN Immich server fail with "fetch failed"
-(System Settings → Privacy & Security → Local Network).
+The app is not yet code-signed with an Apple Developer certificate, so macOS
+Gatekeeper will block it on first launch. To open it:
+
+1. Mount the DMG and drag the app to Applications as usual.
+2. In Terminal, strip the quarantine flag:
+   ```
+   xattr -cr "/Applications/Immich Wallpaper.app"
+   ```
+3. Double-click the app — it will open normally from now on.
+
+Alternatively: right-click the app → **Open** → **Open** in the dialog, then go
+to **System Settings → Privacy & Security** and click **Open Anyway**.
+
+On first connection macOS will also prompt for **Local Network** access — you
+must **Allow** it, otherwise requests to a LAN Immich server fail with
+"fetch failed" (System Settings → Privacy & Security → Local Network).
 
 **Linux**
 The app runs in the system tray — your desktop environment must support it.
