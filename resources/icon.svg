@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="icon-mask">
+      <rect width="512" height="512" rx="112"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#icon-mask)">
+    <rect width="512" height="512" fill="#000"/>
+
+    <!-- Top row -->
+    <rect x="0"   y="0"   width="195" height="208" fill="#ED79B5"/>
+    <rect x="199" y="0"   width="313" height="208" fill="#FFB400"/>
+
+    <!-- Bottom row -->
+    <rect x="0"   y="212" width="235" height="300" fill="#1E83F7"/>
+    <rect x="239" y="212" width="128" height="300" fill="#FA2921"/>
+    <rect x="371" y="212" width="141" height="300" fill="#18C249"/>
+  </g>
+</svg>

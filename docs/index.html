@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Immich Wallpaper</title>
+  <meta name="description" content="A menu-bar app that rotates your desktop wallpaper from a self-hosted Immich server.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      color: #666;
+      background: #fff;
+      line-height: 1.7;
+    }
+
+    .wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .hero-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.10);
+    }
+
+    /* Only the tile group fades; the frame and black base never move */
+    #tiles { transition: opacity 0.3s ease; }
+
+    h1 {
+      font-size: 30px;
+      font-weight: bold;
+      color: #222;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: #666;
+      max-width: 380px;
+      margin: 0 auto 24px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #222;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 24px;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      font-weight: bold;
+      letter-spacing: 0.01em;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #444; }
+
+    /* ── Dividers ── */
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 48px 0;
+    }
+
+    /* ── Screenshots ── */
+    .screenshots {
+      display: flex;
+      gap: 16px;
+    }
+
+    .screenshots img {
+      width: calc((100% - 32px) / 3);
+      min-width: 160px;
+      flex-shrink: 0;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .screenshots img:hover {
+      transform: translateY(-8px) scale(2);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Features ── */
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .feature {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .feature-icon {
+      flex-shrink: 0;
+      width: 20px;
+      font-size: 0.95rem;
+    }
+
+    .feature-text { font-size: 0.95rem; line-height: 1.6; }
+    .feature-text strong { color: #222; }
+
+    /* ── Footer ── */
+    .platforms {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+
+    footer { text-align: center; font-size: 0.8rem; color: #bbb; }
+    footer a { color: #999; text-decoration: none; }
+    footer a:hover { color: #222; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="hero">
+      <!-- Animated collage icon — tiles shuffle every 3 s like the wallpaper -->
+      <svg id="hero-icon" class="hero-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="icon-clip">
+            <rect width="512" height="512" rx="112"/>
+          </clipPath>
+        </defs>
+        <g clip-path="url(#icon-clip)">
+          <rect width="512" height="512" fill="#000"/>
+          <!-- Tile group fades in/out; black base always visible -->
+          <g id="tiles">
+            <rect id="t1" x="0"   y="0"   width="195" height="208" fill="#ED79B5"/>
+            <rect id="t2" x="199" y="0"   width="313" height="208" fill="#FFB400"/>
+            <rect id="t3" x="0"   y="212" width="235" height="300" fill="#1E83F7"/>
+            <rect id="t4" x="239" y="212" width="128" height="300" fill="#FA2921"/>
+            <rect id="t5" x="371" y="212" width="141" height="300" fill="#18C249"/>
+          </g>
+        </g>
+      </svg>
+
+      <h1>Immich Wallpaper</h1>
+      <p class="tagline">Rotates your desktop wallpaper from your self-hosted Immich library. Sits quietly in your menu bar.</p>
+      <p class="platforms">Available for macOS &amp; Linux</p>
+      <a href="https://github.com/dm807cam/immich-wallpaper/releases/latest" class="btn">Download</a>
+    </div>
+
+    <hr>
+
+    <section class="screenshots">
+      <img src="screenshots/connection.png" alt="Connection settings">
+      <img src="screenshots/wallpaper.png"  alt="Wallpaper settings">
+      <img src="screenshots/presets.png"    alt="Presets">
+    </section>
+
+    <hr>
+
+    <section class="features">
+      <div class="feature">
+        <span class="feature-icon">🖼️</span>
+        <div class="feature-text"><strong>Single image or collage</strong> — fill your screen with one shot or a mosaic that sizes itself to each image's shape.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔍</span>
+        <div class="feature-text"><strong>Pick your source</strong> — random shuffle, a specific person's face, or an AI mood search. Your library, your rules.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-text"><strong>Presets</strong> — morning photos, holiday snaps, only the dog. Save setups and switch between them in one click.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🖥️</span>
+        <div class="feature-text"><strong>macOS &amp; Linux</strong> — lives quietly in your menu bar. You'll forget it's there until your wallpaper changes.</div>
+      </div>
+    </section>
+
+    <hr>
+
+    <footer>
+      A hobby project by <a href="https://github.com/dm807cam">Dennis Mayk</a>
+      &nbsp;·&nbsp;
+      Not affiliated with <a href="https://immich.app">Immich</a>.
+    </footer>
+
+  </div>
+
+  <script>
+    const LAYOUTS = [
+      [[0,0,195,208,'#ED79B5'],[199,0,313,208,'#FFB400'],
+       [0,212,235,300,'#1E83F7'],[239,212,128,300,'#FA2921'],[371,212,141,300,'#18C249']],
+      [[0,0,280,204,'#FFB400'],[284,0,228,204,'#18C249'],
+       [0,208,180,304,'#1E83F7'],[184,208,196,304,'#ED79B5'],[384,208,128,304,'#FA2921']],
+      [[0,0,340,216,'#FA2921'],[344,0,168,216,'#18C249'],
+       [0,220,196,292,'#FFB400'],[200,220,200,292,'#1E83F7'],[404,220,108,292,'#ED79B5']],
+      [[0,0,164,228,'#1E83F7'],[168,0,172,228,'#ED79B5'],[344,0,168,228,'#FFB400'],
+       [0,232,296,280,'#18C249'],[300,232,212,280,'#FA2921']],
+      [[0,0,168,196,'#18C249'],[172,0,164,196,'#FA2921'],[340,0,172,196,'#1E83F7'],
+       [0,200,316,312,'#ED79B5'],[320,200,192,312,'#FFB400']],
+    ];
+
+    const tilesGroup = document.getElementById('tiles');
+    const tiles = [1,2,3,4,5].map(i => document.getElementById('t' + i));
+    let current = 0;
+
+    function applyLayout(layout) {
+      layout.forEach(([x, y, w, h, fill], i) => {
+        const t = tiles[i];
+        t.setAttribute('x', x);
+        t.setAttribute('y', y);
+        t.setAttribute('width', w);
+        t.setAttribute('height', h);
+        t.setAttribute('fill', fill);
+      });
+    }
+
+    setInterval(() => {
+      // Fade tiles out, swap layout, fade back in.
+      // The black base and the rounded frame never move.
+      tilesGroup.style.opacity = '0';
+      setTimeout(() => {
+        current = (current + 1) % LAYOUTS.length;
+        applyLayout(LAYOUTS[current]);
+        tilesGroup.style.opacity = '1';
+      }, 300);
+    }, 3000);
+  </script>
+</body>
+</html>
