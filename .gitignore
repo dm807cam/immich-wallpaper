@@ -1,0 +1,14 @@
+node_modules/
+out/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+.vite/
+*.tsbuildinfo
+.claude/
+.idea/
+.vscode/
+*.swp
+*~
+.env

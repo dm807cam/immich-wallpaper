@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest  # Apple Silicon (arm64)
+            arch: arm64
+            platform: mac
+          - os: macos-13      # Intel (x64)
+            arch: x64
+            platform: mac
+          - os: ubuntu-latest
+            arch: x64
+            platform: linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Stamp the release-tag version (e.g. v1.2.3 → 1.2.3) into package.json
+      # so the built artifact filename matches the GitHub release.
+      - name: Stamp version from release tag
+        run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Linux builds need system libraries for Electron and sharp.
+      - name: Install Linux system dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+            libxrandr2 libgbm1 libasound2t64
+
+      - name: Typecheck and build
+        run: npm run build
+
+      - name: Package macOS (${{ matrix.arch }})
+        if: matrix.platform == 'mac'
+        run: npx electron-builder --mac --${{ matrix.arch }}
+        env:
+          # Disable code-signing in CI. To enable, add CSC_LINK / CSC_KEY_PASSWORD
+          # secrets to the repo and remove this line.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Package Linux
+        if: matrix.platform == 'linux'
+        run: npx electron-builder --linux --x64
+
+      - name: Upload macOS DMG to release
+        if: matrix.platform == 'mac'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.dmg
+
+      - name: Upload Linux artifacts to release
+        if: matrix.platform == 'linux'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.AppImage
+            dist/*.deb
