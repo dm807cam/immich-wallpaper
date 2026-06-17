@@ -53,7 +53,7 @@ async function mapLimit<T, R>(
  */
 export class WallpaperEngine {
   private cache = new AssetCache()
-  private outDir = join(app.getPath('temp'), 'immichbg', 'out')
+  private outDir = join(app.getPath('temp'), 'immich-wallpaper', 'out')
   private outCounter = 0
 
   private client: ImmichClient | null = null

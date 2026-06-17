@@ -9,7 +9,7 @@ interface PersistShape {
 }
 
 const store = new Store<PersistShape>({
-  name: 'immichbg',
+  name: 'immich-wallpaper',
   defaults: { config: defaultConfig() }
 })
 

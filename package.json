@@ -1,5 +1,5 @@
 {
-  "name": "immichbg",
+  "name": "immich-wallpaper",
   "version": "0.1.0",
   "description": "macOS menu bar app that drives your desktop wallpaper from an Immich instance",
   "main": "./out/main/index.js",

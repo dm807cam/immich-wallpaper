@@ -1,4 +1,4 @@
-appId: com.immichbg.app
+appId: com.immich-wallpaper.app
 productName: Immich Wallpaper
 directories:
   buildResources: build

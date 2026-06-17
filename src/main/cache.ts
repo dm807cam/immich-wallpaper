@@ -14,7 +14,7 @@ const MAX_FILES = 300
 
 /** Downloads original assets to a temp dir and keeps an LRU on disk. */
 export class AssetCache {
-  private readonly dir = join(app.getPath('temp'), 'immichbg', 'cache')
+  private readonly dir = join(app.getPath('temp'), 'immich-wallpaper', 'cache')
   private readonly entries = new Map<string, Entry>()
   private readonly inflight = new Map<string, Promise<string>>()
   private ready: Promise<void>
