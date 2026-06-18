@@ -1,6 +1,6 @@
 {
   "name": "immich-wallpaper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "macOS menu bar app that drives your desktop wallpaper from an Immich instance",
   "main": "./out/main/index.js",
   "author": "Dennis Mayk <https://github.com/dm807cam>",
