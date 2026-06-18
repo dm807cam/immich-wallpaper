@@ -4,9 +4,9 @@ import {
   type CollageLayout,
   type Interval,
   type IntervalUnit,
-  type Source,
   type WallpaperConfig
 } from '../../shared/types'
+import { toDraft, buildSource, validateSource, type SourceDraft } from './source-draft'
 
 // --- tiny hyperscript -------------------------------------------------------
 type Child = Node | string | number | null | undefined
@@ -73,34 +73,6 @@ async function ensurePeople(): Promise<Array<{ id: string; name: string }>> {
 }
 
 // --- source editor ----------------------------------------------------------
-interface SourceDraft {
-  kind: Source['kind']
-  query: string
-  personIds: Set<string>
-  favoritesOnly: boolean
-}
-function toDraft(s: Source): SourceDraft {
-  return {
-    kind: s.kind,
-    query: s.kind === 'theme' ? s.query : '',
-    personIds: new Set(s.kind === 'theme' ? s.personIds ?? [] : s.kind === 'person' ? s.personIds : []),
-    favoritesOnly: s.kind === 'random' ? Boolean(s.favoritesOnly) : false
-  }
-}
-function buildSource(d: SourceDraft): Source {
-  if (d.kind === 'theme') {
-    const s: Source = { kind: 'theme', query: d.query.trim() }
-    if (d.personIds.size) s.personIds = [...d.personIds]
-    return s
-  }
-  if (d.kind === 'person') return { kind: 'person', personIds: [...d.personIds] }
-  return { kind: 'random', favoritesOnly: d.favoritesOnly }
-}
-function validateSource(d: SourceDraft): string | null {
-  if (d.kind === 'theme' && !d.query.trim()) return 'Enter a theme/topic query.'
-  if (d.kind === 'person' && d.personIds.size === 0) return 'Select at least one person.'
-  return null
-}
 
 function renderSourceEditor(draft: SourceDraft): HTMLElement {
   const body = h('div')
@@ -113,7 +85,11 @@ function renderSourceEditor(draft: SourceDraft): HTMLElement {
         {
           value: draft.kind,
           onchange: (ev: Event) => {
-            draft.kind = (ev.target as HTMLSelectElement).value as Source['kind']
+            const newKind = (ev.target as HTMLSelectElement).value as SourceDraft['kind']
+            if (newKind !== draft.kind) {
+              draft.kind = newKind
+              draft.personIds = new Set()
+            }
             redraw()
           }
         },
