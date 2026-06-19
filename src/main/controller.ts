@@ -13,6 +13,7 @@ export class Controller {
   readonly scheduler = new Scheduler(this.engine, (err) => this.setError(err))
   private onChange: (() => void) | null = null
   private lastError: string | null = null
+  private _client: ImmichClient | null = null
 
   setOnChange(cb: () => void): void {
     this.onChange = cb
@@ -33,7 +34,12 @@ export class Controller {
     return this.lastError
   }
 
+  /** Return the cached client built during the last reload(). */
   buildClient(): ImmichClient | null {
+    return this._client
+  }
+
+  private rebuildClient(): ImmichClient | null {
     const cfg = getConfig()
     const key = getApiKey()
     if (!cfg.server.baseUrl || !key) return null
@@ -43,7 +49,8 @@ export class Controller {
   /** Re-read config, rebuild client/engine/scheduler. Optionally repaint immediately. */
   async reload(applyNow = false): Promise<void> {
     const cfg = getConfig()
-    this.engine.setClient(this.buildClient())
+    this._client = this.rebuildClient()
+    this.engine.setClient(this._client)
     this.engine.setConfig(cfg.active)
     this.scheduler.build(cfg.active)
     if (cfg.paused) this.scheduler.pause()
@@ -91,7 +98,7 @@ export class Controller {
   }
 
   async preview(source: Source): Promise<PreviewResult> {
-    const client = this.buildClient()
+    const client = this._client
     if (!client) return { count: 0, samples: [] }
     const ids = await client.resolvePool(source, 60)
     const sampleIds = ids.slice(0, 6)

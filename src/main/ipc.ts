@@ -5,7 +5,7 @@ import { homedir } from 'node:os'
 import { getApiKey, getConfig, hasApiKey, setApiKey, updateConfig } from './config'
 import { normalizeBaseUrl } from './immich'
 import type { Controller } from './controller'
-import { WallpaperConfig, type Source } from '../shared/types'
+import { WallpaperConfig, Source } from '../shared/types'
 
 function applyLinuxAutostart(enabled: boolean): void {
   const dir = join(homedir(), '.config', 'autostart')
@@ -106,7 +106,7 @@ export function registerIpc(controller: Controller): void {
   ipcMain.handle('immich:albums', () => controller.buildClient()?.albums() ?? [])
   ipcMain.handle('immich:tags', () => controller.buildClient()?.tags() ?? [])
 
-  ipcMain.handle('source:preview', (_e, source: Source) => controller.preview(source))
+  ipcMain.handle('source:preview', (_e, raw: unknown) => controller.preview(Source.parse(raw)))
 
   ipcMain.handle('wallpaper:applyNow', () => controller.applyNow())
   ipcMain.handle('wallpaper:setPaused', (_e, paused: boolean) => {

@@ -25,6 +25,7 @@ import {
 const COLLAGE_DEBOUNCE_MS = 500
 const KEEP_OUTPUTS = 4
 const TILE_CACHE_MAX = 32
+const TILE_CACHE_MAX_BYTES = 128 * 1024 * 1024 // 128 MB — raw pixel buffers can be large on HiDPI
 // Cap how many tiles download/decode at once so a many-tile collage of large
 // images can't spike memory or saturate the CPU.
 const TILE_CONCURRENCY = 3
@@ -74,6 +75,7 @@ export class WallpaperEngine {
   // Resized tile pixels keyed by `${id}@${w}x${h}` so a tile reused at the same
   // size (e.g. across applyNow / re-justify) is not re-decoded/re-resized.
   private tileCache = new Map<string, Buffer>()
+  private tileCacheBytes = 0
 
   private flushTimer: NodeJS.Timeout | null = null
   private busy = false
@@ -96,6 +98,7 @@ export class WallpaperEngine {
   setConfig(config: WallpaperConfig): void {
     this.config = config
     this.tileCache.clear() // tile dimensions change with layout/source
+    this.tileCacheBytes = 0
     this.sizeById.clear()
     this.focalById.clear()
     this.collageEnriched = false
@@ -176,9 +179,12 @@ export class WallpaperEngine {
     const srcSize = this.sizeById.get(id)
     const buf = await resizeTile(path, w, h, focal, srcSize)
     this.tileCache.set(key, buf)
-    while (this.tileCache.size > TILE_CACHE_MAX) {
+    this.tileCacheBytes += buf.length
+    while (this.tileCache.size > TILE_CACHE_MAX || this.tileCacheBytes > TILE_CACHE_MAX_BYTES) {
       const oldest = this.tileCache.keys().next().value
       if (oldest === undefined) break
+      const evicted = this.tileCache.get(oldest)!
+      this.tileCacheBytes -= evicted.length
       this.tileCache.delete(oldest)
     }
     return buf
@@ -222,7 +228,8 @@ export class WallpaperEngine {
     const src = await this.cache.get(id, this.client)
     const { width, height } = this.displayPixels()
     const focal = await this.cellFocal(id)
-    const out = await composeSingle(src, width, height, await this.nextOutPath('jpg'), focal)
+    const srcSize = focal ? await this.cellSize(id, src) : undefined
+    const out = await composeSingle(src, width, height, await this.nextOutPath('jpg'), focal, srcSize)
     await setWallpaperAllDisplays(out)
     this.cache.prefetch(this.singlePool.peek(3), this.client)
   }

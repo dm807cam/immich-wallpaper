@@ -14,6 +14,7 @@ interface SearchResponse {
 
 const MAX_PAGE_SIZE = 1000 // Immich caps search page size at 1000
 const SPREAD_PAGE = 100 // small pages so random page sampling spreads across the timeline
+const SPREAD_CONCURRENCY = 4 // max parallel page fetches during pool build
 
 function shuffleInPlace<T>(a: T[]): void {
   for (let i = a.length - 1; i > 0; i--) {
@@ -205,15 +206,27 @@ export class ImmichClient {
     const pages = Array.from({ length: numPages }, (_, i) => i + 1)
     shuffleInPlace(pages)
     const wantPages = Math.min(numPages, Math.ceil(size / SPREAD_PAGE))
+    const selected = pages.slice(0, wantPages)
 
-    await Promise.all(
-      pages.slice(0, wantPages).map((p) =>
-        this.post<SearchResponse>('/search/metadata', { ...base, size: SPREAD_PAGE, page: p })
-          .then((res) => collect(res.assets?.items))
-          .catch(() => {
-            /* best-effort: skip a page that fails, keep the ids we have */
+    // Fetch pages with bounded concurrency to avoid a burst of parallel requests.
+    let cursor = 0
+    const worker = async (): Promise<void> => {
+      while (cursor < selected.length) {
+        const p = selected[cursor++]
+        try {
+          const res = await this.post<SearchResponse>('/search/metadata', {
+            ...base,
+            size: SPREAD_PAGE,
+            page: p
           })
-      )
+          collect(res.assets?.items)
+        } catch {
+          /* best-effort: skip a page that fails, keep the ids we have */
+        }
+      }
+    }
+    await Promise.all(
+      Array.from({ length: Math.min(SPREAD_CONCURRENCY, selected.length) }, worker)
     )
     return [...ids].slice(0, size)
   }
@@ -285,7 +298,7 @@ export class ImmichClient {
 
   /** Download a small thumbnail (for UI previews). Returns a base64 data URL. */
   async thumbnailDataUrl(id: string): Promise<string> {
-    const res = await this.doFetch(this.url(`/assets/${id}/thumbnail?size=preview`), {
+    const res = await this.doFetch(this.url(`/assets/${id}/thumbnail?size=thumbnail`), {
       headers: this.headers(false)
     })
     if (!res.ok) throw new Error(`thumbnail ${id} -> ${res.status}`)

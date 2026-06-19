@@ -13,18 +13,28 @@ const store = new Store<PersistShape>({
   defaults: { config: defaultConfig() }
 })
 
+// In-memory cache: avoids repeated Zod parses on every IPC call.
+// Invalidated on every write so reads always reflect the current state.
+let cachedConfig: AppConfig | null = null
+
 export function getConfig(): AppConfig {
+  if (cachedConfig) return cachedConfig
   const parsed = AppConfig.safeParse(store.get('config'))
-  if (parsed.success) return parsed.data
+  if (parsed.success) {
+    cachedConfig = parsed.data
+    return cachedConfig
+  }
   // Corrupt/old config -> reset to defaults rather than crash.
   const fresh = defaultConfig()
   store.set('config', fresh)
+  cachedConfig = fresh
   return fresh
 }
 
 export function setConfig(config: AppConfig): AppConfig {
   const validated = AppConfig.parse(config)
   store.set('config', validated)
+  cachedConfig = validated
   return validated
 }
 

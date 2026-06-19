@@ -1,6 +1,6 @@
 import { app } from 'electron'
 import { promises as fs } from 'node:fs'
-import { join } from 'node:path'
+import { join, basename } from 'node:path'
 import type { ImmichClient } from './immich'
 
 interface Entry {
@@ -20,7 +20,37 @@ export class AssetCache {
   private ready: Promise<void>
 
   constructor() {
-    this.ready = fs.mkdir(this.dir, { recursive: true }).then(() => {})
+    this.ready = fs
+      .mkdir(this.dir, { recursive: true })
+      .then(() => this.scanExisting())
+      .then(() => {})
+  }
+
+  /** Populate entries from files already on disk (from previous sessions). */
+  private async scanExisting(): Promise<void> {
+    let files: string[]
+    try {
+      files = await fs.readdir(this.dir)
+    } catch {
+      return
+    }
+    await Promise.all(
+      files
+        .filter((f) => f.endsWith('.bin'))
+        .map(async (f) => {
+          const id = basename(f, '.bin')
+          const path = join(this.dir, f)
+          try {
+            const stat = await fs.stat(path)
+            this.entries.set(id, { path, size: stat.size, lastUsed: stat.mtimeMs })
+          } catch {
+            // file disappeared between readdir and stat — skip
+          }
+        })
+    )
+    // Enforce limits on the restored set so a large prior session doesn't
+    // exceed the cap before any new downloads happen.
+    await this.evictIfNeeded()
   }
 
   /** Return a local file path for an asset, downloading via `client` if absent. */
@@ -29,12 +59,7 @@ export class AssetCache {
     const hit = this.entries.get(id)
     if (hit) {
       hit.lastUsed = Date.now()
-      try {
-        await fs.access(hit.path)
-        return hit.path
-      } catch {
-        this.entries.delete(id) // file vanished; fall through to re-download
-      }
+      return hit.path
     }
     const existing = this.inflight.get(id)
     if (existing) return existing

@@ -105,11 +105,12 @@ export async function composeSingle(
   width: number,
   height: number,
   outPath: string,
-  focal?: Focal
+  focal?: Focal,
+  srcSize?: { w: number; h: number }
 ): Promise<string> {
   const pipeline = sharp(imagePath).rotate()
   if (focal) {
-    const { w: sw, h: sh } = await orientedSize(imagePath)
+    const { w: sw, h: sh } = srcSize ?? (await orientedSize(imagePath))
     pipeline.extract(coverRegion(sw, sh, width, height, focal)).resize(width, height)
   } else {
     pipeline.resize(width, height, { fit: 'cover', position: 'centre' })

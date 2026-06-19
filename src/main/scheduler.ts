@@ -53,14 +53,17 @@ export class Scheduler {
   }
 
   private async fire(task: Task): Promise<void> {
-    task.nextFire = Date.now() + task.intervalMs
-    if (!this.paused) this.arm(task)
     try {
       await task.fn()
       this.onResult?.(null)
     } catch (e) {
       console.error(`[scheduler:${task.label}]`, e)
       this.onResult?.(e instanceof Error ? e : new Error(String(e)))
+    } finally {
+      // Re-arm only after the task finishes so a slow render never produces
+      // two concurrent executions (renderSingle has no busy guard).
+      task.nextFire = Date.now() + task.intervalMs
+      if (!this.paused) this.arm(task)
     }
   }
 
